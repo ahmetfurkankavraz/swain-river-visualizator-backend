@@ -63,8 +63,8 @@ function divideRiverBranchesToSegments(branch, min, max, branchId){
 // Before the interpolation append an element for orderInBranch = 0 and orderInBranch = last_item
 function arrangeMeasurementsArray(measurementsArray, lastItemOrderInBranch){
     measurementsArray.sort((a, b) => a.orderInBranch - b.orderInBranch);
-    measurementsArray.unshift(structuredClone(structuredClone(measurementsArray.at(0))));
-    measurementsArray.push(structuredClone(structuredClone(measurementsArray.at(-1))));
+    measurementsArray.unshift({ ...measurementsArray.at(0) });
+    measurementsArray.push({ ...measurementsArray.at(-1) });
     measurementsArray.at(0).orderInBranch = 0;
     measurementsArray.at(-1).orderInBranch = lastItemOrderInBranch;
 }

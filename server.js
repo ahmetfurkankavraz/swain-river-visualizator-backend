@@ -1,5 +1,7 @@
 const express = require('express');
 const bodyParser = require('body-parser');
+const swaggerUi = require('swagger-ui-express')
+const swaggerFile = require('./swagger_output.json')
 const {connectToDb} = require('./db/db');
 require('dotenv').config();
 
@@ -27,4 +29,4 @@ app.use('/device', require("./router/device"));
 app.use('/measurement', require("./router/measurement"));
 app.use('/interpolate', require("./router/interpolate"));
 app.use('/login', require("./router/login"));
-
+app.use('/doc', swaggerUi.serve, swaggerUi.setup(swaggerFile))

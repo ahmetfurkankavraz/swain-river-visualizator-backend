@@ -2,15 +2,687 @@
   "swagger": "2.0",
   "info": {
     "version": "1.0.0",
-    "title": "REST API",
-    "description": ""
+    "title": "SWAIN River Pollutant Visualizer Backend API",
+    "description": "This is a backend API for the SWAIN River Pollutant Visualizer."
   },
   "host": "localhost:3000",
   "basePath": "/",
   "schemes": [
     "http"
   ],
+  "consumes": [
+    "application/json"
+  ],
+  "produces": [
+    "application/json"
+  ],
   "paths": {
-    
+    "/river": {
+      "get": {
+        "summary": "Get all the river coordinates",
+        "description": "Get all the river coordinates",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "schema": {
+              "$ref": "#/definitions/RiverGet"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/ErrorModel"
+            }
+          }
+        }
+      },
+      "post": {
+        "summary": "Add a new river",
+        "description": "Add a new river",
+        "parameters": [
+          {
+            "name": "river",
+            "in": "body",
+            "description": "River to add",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/RiverAdd"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Success"
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/ErrorModel"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/ErrorModel"
+            }
+          }
+        }
+      },
+      "delete": {
+        "summary": "Delete all the river coordinates",
+        "description": "Delete all the river coordinates",
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/ErrorModel"
+            }
+          }
+        }
+      }
+    },
+    "device": {
+      "get": {
+        "summary": "Get all the device coordinates",
+        "description": "Get all the device coordinates",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "schema": {
+              "$ref": "#/definitions/DeviceGet"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/ErrorModel"
+            }
+          }
+        }
+      },
+      "post": {
+        "summary": "Add a new device",
+        "description": "Add a new device",
+        "parameters": [
+          {
+            "name": "device",
+            "in": "body",
+            "description": "Device to add",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/RiverPoint"
+            }
+          }
+        ]
+      },
+      "delete": {
+        "summary": "Delete all the device coordinates",
+        "description": "Delete all the device coordinates",
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/ErrorModel"
+            }
+          }
+        }
+      }
+    },
+    "device/{pointId}": {
+      "post": {
+        "summary": "Update a point as device",
+        "description": "Update a point as device",
+        "parameters": [
+          {
+            "name": "pointId",
+            "in": "path",
+            "description": "Point ID",
+            "required": true,
+            "type": "string"
+          }
+        ]
+      }
+    },
+    "measurement": {
+      "post": {
+        "summary": "Add a new measurement",
+        "description": "Add a new measurement",
+        "parameters": [
+          {
+            "name": "measurement",
+            "in": "body",
+            "description": "Measurement to add",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/MeasurementAdd"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Success"
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/ErrorModel"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/ErrorModel"
+            }
+          }
+        }
+      },
+      "get": {
+        "summary": "Get all the measurements",
+        "description": "Get all the measurements",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/Measurement"
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/ErrorModel"
+            }
+          }
+        }
+      }
+    },
+    "measurement/{deviceId}": {
+      "get": {
+        "summary": "Get a measurement by ID",
+        "description": "Get a measurement by ID",
+        "parameters": [
+          {
+            "name": "deviceId",
+            "in": "path",
+            "description": "Device point ID to filter Measurements",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "schema": {
+              "$ref": "#/definitions/Measurement"
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/ErrorModel"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/ErrorModel"
+            }
+          }
+        }
+      }
+    },
+    "measurements/{measurementId}": {
+      "delete": {
+        "summary": "Delete a measurement by ID",
+        "description": "Delete a measurement by ID",
+        "parameters": [
+          {
+            "name": "measurementId",
+            "in": "path",
+            "description": "Measurement ID",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/ErrorModel"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/ErrorModel"
+            }
+          }
+        }
+      }
+    },
+    "measurement/date": {
+      "get": {
+        "summary": "Get all the unique measurement dates",
+        "description": "Get all the unique measurement dates",
+        "responses": {
+          "200": {
+            "description": "Success",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/ErrorModel"
+            }
+          }
+        }
+      }
+    },
+    "measurement/{date}/type": {
+      "get": {
+        "summary": "Get all the unique measurement types for a date",
+        "description": "Get all the unique measurement types for a date",
+        "parameters": [
+          {
+            "name": "date",
+            "in": "path",
+            "description": "Date in the format YYYY-MM-DD",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/ErrorModel"
+            }
+          }
+        }
+      }
+    },
+    "measurement/{date}/{type}": {
+      "get": {
+        "summary": "Get all the measurements for a date and type",
+        "description": "Get all the measurements for a date and type",
+        "parameters": [
+          {
+            "name": "date",
+            "in": "path",
+            "description": "Date in the format YYYY-MM-DD",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "type",
+            "in": "path",
+            "description": "Measurement type",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/Measurement"
+              }
+            }
+          }
+        }
+      }
+    },
+    "interpolate/{date}/{type}": {
+      "get": {
+        "summary": "Get all the interpolated measurements for a date and type",
+        "description": "Get all the interpolated measurements for a date and type",
+        "parameters": [
+          {
+            "name": "date",
+            "in": "path",
+            "description": "Date in the format YYYY-MM-DD",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "type",
+            "in": "path",
+            "description": "Measurement type",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/Interpolation"
+              }
+            }
+          }
+        }
+      }
+    },
+    "login": {
+      "post": {
+        "summary": "Login",
+        "description": "Login",
+        "parameters": [
+          {
+            "name": "Login",
+            "in": "body",
+            "description": "Login Credentials",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/Login"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "schema": {
+              "$ref": "#/definitions/Token"
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/ErrorModel"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/ErrorModel"
+            }
+          }
+        }
+      }
+    }
+  },
+  "definitions": {
+    "RiverGet": {
+      "type": "array",
+      "items": {
+        "properties": {
+          "branchId": {
+            "type": "number"
+          },
+          "riverPoints": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "_id": {
+                  "type": "string"
+                },
+                "lat": {
+                  "type": "number"
+                },
+                "lng": {
+                  "type": "number"
+                },
+                "orderInBranch": {
+                  "type": "number"
+                },
+                "branchId": {
+                  "type": "number"
+                },
+                "device": {
+                  "type": "boolean"
+                }
+              }
+            }
+          }
+        }
+      },
+      "required": [
+        "branchId",
+        "riverPoints"
+      ]
+    },
+    "RiverAdd": {
+      "type": "array",
+      "items": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "lng": {
+              "type": "number",
+              "format": "double"
+            },
+            "lat": {
+              "type": "number",
+              "format": "double"
+            }
+          },
+          "required": [
+            "lng",
+            "lat"
+          ]
+        }
+      },
+      "minItems": 1
+    },
+    "RiverPoint": {
+      "type": "object",
+      "properties": {
+        "lat": {
+          "type": "number",
+          "format": "double"
+        },
+        "lng": {
+          "type": "number",
+          "format": "double"
+        }
+      },
+      "required": [
+        "lat",
+        "lng"
+      ]
+    },
+    "ErrorModel": {
+      "type": "object",
+      "properties": {
+        "error": {
+          "type": "string"
+        }
+      }
+    },
+    "DeviceGet": {
+      "type": "array",
+      "items": {
+        "properties": {
+          "_id": {
+            "type": "string"
+          },
+          "lat": {
+            "type": "number"
+          },
+          "lng": {
+            "type": "number"
+          },
+          "orderInBranch": {
+            "type": "number"
+          },
+          "branchId": {
+            "type": "number"
+          },
+          "device": {
+            "type": "boolean"
+          }
+        }
+      }
+    },
+    "MeasurementAdd": {
+      "type": "object",
+      "properties": {
+        "pointId": {
+          "type": "string"
+        },
+        "date": {
+          "type": "string",
+          "format": "date"
+        },
+        "type": {
+          "type": "string"
+        },
+        "value": {
+          "type": "number"
+        }
+      },
+      "required": [
+        "pointId",
+        "date",
+        "type",
+        "value"
+      ]
+    },
+    "Measurement": {
+      "type": "object",
+      "properties": {
+        "_id": {
+          "type": "string"
+        },
+        "pointId": {
+          "type": "string"
+        },
+        "date": {
+          "type": "string",
+          "format": "date"
+        },
+        "type": {
+          "type": "string"
+        },
+        "value": {
+          "type": "number"
+        }
+      },
+      "required": [
+        "_id",
+        "pointId",
+        "date",
+        "type",
+        "value"
+      ]
+    },
+    "Interpolation": {
+      "type": "object",
+      "properties": {
+        "scale": {
+          "type": "number"
+        },
+        "branchId": {
+          "type": "string"
+        },
+        "segmentInd": {
+          "type": "number"
+        },
+        "riverPoints": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "_id": {
+                "type": "string"
+              },
+              "branchId": {
+                "type": "number"
+              },
+              "orderInBranch": {
+                "type": "number"
+              },
+              "device": {
+                "type": "boolean"
+              },
+              "lng": {
+                "type": "number"
+              },
+              "lat": {
+                "type": "number"
+              },
+              "value": {
+                "type": "number"
+              }
+            },
+            "required": [
+              "_id",
+              "branchId",
+              "orderInBranch",
+              "device",
+              "lng",
+              "lat",
+              "value"
+            ]
+          }
+        }
+      },
+      "required": [
+        "scale",
+        "branchId",
+        "segmentInd",
+        "riverPoints"
+      ]
+    },
+    "Login": {
+      "type": "object",
+      "properties": {
+        "username": {
+          "type": "string"
+        },
+        "password": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "username",
+        "password"
+      ]
+    },
+    "Token": {
+      "type": "object",
+      "properties": {
+        "token": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "token"
+      ]
+    }
   }
 }

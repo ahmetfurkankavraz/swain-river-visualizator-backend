@@ -89,11 +89,11 @@ router.delete('/', authenticateToken, function (req, res) {
                     res.status(200).send();
                 })
                 .catch(() => {
-                    res.status(500).json({error: "Couldn't deleted the records!"})
+                    res.status(500).json({error: "Couldn't delete the records!"})
                 })
         })
         .catch(() => {
-            res.status(500).json({error: "Couldn't deleted the records!"})
+            res.status(500).json({error: "Couldn't delete the records!"})
         })
 });
 

@@ -106,8 +106,8 @@
         }
       },
       "post": {
-        "summary": "Add a new device",
-        "description": "Add a new device",
+        "summary": "Add a new device using longitude and latitude",
+        "description": "Add a new device using longitude and latitude",
         "parameters": [
           {
             "name": "device",
@@ -118,11 +118,33 @@
               "$ref": "#/definitions/RiverPoint"
             }
           }
-        ]
+        ],
+        "responses": {
+          "201": {
+            "description": "Success"
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/ErrorModel"
+            }
+          }
+        }
       },
       "delete": {
-        "summary": "Delete all the device coordinates",
-        "description": "Delete all the device coordinates",
+        "summary": "Delete a device using longitude and latitude",
+        "description": "Delete a device using longitude and latitude",
+        "parameters": [
+          {
+            "name": "device",
+            "in": "body",
+            "description": "Device to add",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/RiverPoint"
+            }
+          }
+        ],
         "responses": {
           "200": {
             "description": "Success"
@@ -138,8 +160,8 @@
     },
     "device/{pointId}": {
       "post": {
-        "summary": "Update a point as device",
-        "description": "Update a point as device",
+        "summary": "Update a device using the point ID",
+        "description": "Update a device using the point ID",
         "parameters": [
           {
             "name": "pointId",
@@ -148,7 +170,59 @@
             "required": true,
             "type": "string"
           }
-        ]
+        ],
+        "responses": {
+          "201": {
+            "description": "Success"
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/ErrorModel"
+            }
+          }
+        }
+      },
+      "delete": {
+        "summary": "Delete a device using the point ID",
+        "description": "Delete a device using the point ID",
+        "parameters": [
+          {
+            "name": "pointId",
+            "in": "path",
+            "description": "Point ID",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/ErrorModel"
+            }
+          }
+        }
+      }
+    },
+    "delete/all":{
+      "delete": {
+        "summary": "Delete all the devices",
+        "description": "Delete all the devices",
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/ErrorModel"
+            }
+          }
+        }
       }
     },
     "measurement": {
@@ -329,6 +403,59 @@
         }
       }
     },
+    "measurement/type": {
+      "get": {
+        "summary": "Get all the unique measurement types",
+          "description": "Get all the unique measurement types",
+          "responses": {
+          "200": {
+            "description": "Success",
+              "schema": {
+              "type": "array",
+                "items": {
+                "type": "string"
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/ErrorModel"
+            }
+          }
+        }
+      }
+    },
+    "measurement/{type}/date": {
+      "get": {
+        "summary": "Get all the unique measurement dates for a type",
+        "description": "Get all the unique measurement dates for a type",
+        "parameters": [{
+          "name": "type",
+          "in": "path",
+          "description": "Measurement type",
+          "required": true,
+          "type": "string"
+        }],
+        "responses": {
+          "200": {
+            "description": "Success",
+              "schema": {
+              "type": "array",
+                "items": {
+                "type": "string"
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/ErrorModel"
+            }
+          }
+        }
+      }
+    },
     "measurement/{date}/{type}": {
       "get": {
         "summary": "Get all the measurements for a date and type",
@@ -357,6 +484,48 @@
               "items": {
                 "$ref": "#/definitions/Measurement"
               }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/ErrorModel"
+            }
+          }
+        }
+      }
+    },
+    "measurement/catalog/{date}/{type}": {
+      "get": {
+        "summary": "Get a catalog of measurements for a date and type",
+        "description": "Get a catalog of measurements for a date and type",
+        "parameters": [
+          {
+            "name": "date",
+            "in": "path",
+            "description": "Date in the format YYYY-MM-DD",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "type",
+            "in": "path",
+            "description": "Measurement type",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "schema": {
+              "$ref": "#/definitions/MeasurementCatalog"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/ErrorModel"
             }
           }
         }
@@ -578,6 +747,12 @@
         "_id": {
           "type": "string"
         },
+        "lat": {
+          "type": "number"
+        },
+        "lng": {
+          "type": "number"
+        },
         "pointId": {
           "type": "string"
         },
@@ -595,6 +770,8 @@
       "required": [
         "_id",
         "pointId",
+        "lng",
+        "lat",
         "date",
         "type",
         "value"
@@ -682,6 +859,21 @@
       },
       "required": [
         "token"
+      ]
+    },
+    "MeasurementCatalog": {
+      "type": "object",
+      "properties": {
+        "min-value": {
+          "type": "number"
+        },
+        "max-value": {
+          "type": "number"
+        }
+      },
+      "required": [
+        "min-value",
+        "max-value"
       ]
     }
   }

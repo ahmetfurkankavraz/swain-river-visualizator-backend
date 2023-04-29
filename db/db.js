@@ -1,5 +1,12 @@
 const { MongoClient } = require('mongodb');
 const { collectionsConfig } = require('./db_config') 
+const crypto = require('crypto');
+
+function sha256(data) {
+    const hash = crypto.createHash('sha256');
+    hash.update(data);
+    return hash.digest('hex');
+}
 
 let dbConnection;
 
@@ -28,7 +35,7 @@ module.exports = {
                     .then(() => {
                         dbConnection.collection('admins').insertMany(
                             process.env.ADMIN_CREDENTIALS.split(',')
-                            .map((item) => {return {username: item.split(':')[0], password: item.split(':')[1]}})
+                            .map((item) => {return {username: item.split(':')[0], password: sha256(item.split(':')[1])}})
                         );
                     })
             return cb();

@@ -4,7 +4,7 @@ const authenticateToken = require('../middleware/authenticateToken');
 
 const router = express.Router();
 
-router.get('/', authenticateToken, function (req, res) {
+router.get('/', authenticateToken, async function (req, res) {
     
     let pointMap = new Map();
 
@@ -39,7 +39,7 @@ router.get('/', authenticateToken, function (req, res) {
         })
 });
 
-router.post('/', authenticateToken, function (req, res) {
+router.post('/', authenticateToken, async function (req, res) {
 
     const riverPointsInDb = []
 
@@ -79,7 +79,7 @@ router.post('/', authenticateToken, function (req, res) {
         })
 });
 
-router.delete('/', authenticateToken, function (req, res) {
+router.delete('/', authenticateToken, async function (req, res) {
     riverPointCollection()
         .deleteMany({})
         .then(() => {

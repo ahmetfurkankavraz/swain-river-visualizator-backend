@@ -19,7 +19,7 @@ router.post('/', (req, res) => {
                 );
                 res.status(200).json({ accessToken: accessToken });
             } else {
-                res.sendStatus(400);
+                res.sendStatus(401);
             }
         })
         .catch((err) => {

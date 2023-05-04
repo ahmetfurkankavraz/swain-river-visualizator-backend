@@ -549,6 +549,16 @@
             "description": "Measurement type",
             "required": true,
             "type": "string"
+          },
+          {
+            "name": "scaleArray",
+            "in": "query",
+            "description": "scaleArray to be used for interpolation",
+            "required": true,
+            "type": "array",
+            "items": {
+              "type": "number"
+            }
           }
         ],
         "responses": {

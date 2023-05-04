@@ -68,6 +68,31 @@ function arrangeMeasurementsArray(measurementsArray, lastItemOrderInBranch){
     measurementsArray.at(-1).orderInBranch = lastItemOrderInBranch;
 }
 
+function validateScaleArray(arr){
+
+    if (!arr){
+        return false;
+    }
+
+    if (arr.length < 2){
+        return false;
+    }
+
+    for (let i = 0; i < arr.length; i++){
+        arr[i] = parseFloat(arr[i]);
+        if (isNaN(arr[i])){
+            return false;
+        }
+    }
+
+    for (let i = 0; i < arr.length - 1; i++){
+        if (arr[i] > arr[i + 1]){
+            return false;
+        }
+    }
+    return true;
+}
+
 router.get('/:date/:type', authenticateToken, async function (req, res) {
 
 try {
@@ -87,8 +112,13 @@ try {
 
     const date = new Date(req.params.date);
     const type = req.params.type;
-    const scale = 5
+    const segmentDividerArray = req.query.scaleArray;
 
+    if (!validateScaleArray(segmentDividerArray)){
+        res.status(400).send({error: "Scale array is not valid"});
+        return;
+    }
+    
     // get the devices with specific type and date 
     let deviceLocations = [];
     let measurementsMap = new Map();
@@ -179,7 +209,6 @@ try {
     // })
 
     let river = []
-    const segmentDividerArray = arrayRange(min, max, scale);
     // console.log(segmentDividerArray);
     
     for (let key in pointMap){

@@ -40,8 +40,6 @@ async function createCatalog(rootBranchId) {
         ]).toArray();
 
 
-      const adjacencyList = new Map();
-      const pathlist = []
       const adjlist = new Map();
 
       // Create an array to store the promises
@@ -73,15 +71,6 @@ async function createCatalog(rootBranchId) {
 
               a.forEach((point) => {
                   if (point.distance <= 75){
-                      let f = {
-                          "lng": item.loc.coordinates[0],
-                          "lat": item.loc.coordinates[1]
-                      } 
-                      let x = {
-                          "lng": point.loc.coordinates[0],
-                          "lat": point.loc.coordinates[1]
-                      }
-                      pathlist.push([f, x]);   
                       mappedPoints.push([point._id, item._id]);
                       mappedPoints.push([item._id, point._id]);
                   }
@@ -111,12 +100,6 @@ async function createCatalog(rootBranchId) {
       }}
       
       await Promise.all(promises);
-
-      let result = []
-      // print the adjacency list
-      for (let [key, value] of adjacencyList) {
-          result.push(value.path)
-      }
 
       // for (let [key, value] of adjlist){
       //     console.log(key, value);
@@ -159,7 +142,7 @@ async function createCatalog(rootBranchId) {
 }
 
 // generate database catalog
-router.get('/', authenticateToken, async function (req, res) {
+router.post('/', authenticateToken, async function (req, res) {
 
   try {
   
@@ -172,5 +155,98 @@ router.get('/', authenticateToken, async function (req, res) {
       res.status(500).json({error: "An error occurred during the interpolation"});
   }
 });
+
+
+router.get('/', authenticateToken, async function createCatalog(req, res) {
+
+  try {
+  
+      let rs = await riverPointCollection().aggregate([
+          // Group by branchId and find minimum and maximum orderInBranch for each group
+          {
+            $group: {
+              _id: "$branchId",
+              minOrder: { $min: "$orderInBranch" },
+              maxOrder: { $max: "$orderInBranch" },
+              items: { $push: "$$ROOT" } // Add all the documents to the 'items' array
+            }
+          },
+          // Project only the documents that have minimum or maximum orderInBranch
+          {
+            $project: {
+              _id: 0,
+              branchId: "$_id",
+              items: {
+                $filter: {
+                  input: "$items",
+                  as: "item",
+                  cond: {
+                    $or: [
+                      { $eq: ["$$item.orderInBranch", "$minOrder"] },
+                      { $eq: ["$$item.orderInBranch", "$maxOrder"] }
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        ]).toArray();
+
+
+      const pathlist = []
+
+      // Create an array to store the promises
+      const promises = [];
+          
+      // Use for...of loop to iterate over rs array
+      for (const el of rs) {
+      // Use for...of loop to iterate over items array
+      for (const item of el.items) {
+          // Push the promise into the array
+          let rs = riverPointCollection().aggregate([{
+          $geoNear: {
+              near: item.loc,
+              distanceField: "distance",
+              spherical: true
+          }
+          },{
+          $match: {
+              branchId: { $ne: el.branchId }
+          }
+          },{
+          $sort: {
+              distance: 1
+          }
+          },{
+          $limit: 1
+          }]).toArray().then(a => {
+
+              a.forEach((point) => {
+                  if (point.distance <= 75){
+                      let f = {
+                          "lng": item.loc.coordinates[0],
+                          "lat": item.loc.coordinates[1]
+                      } 
+                      let x = {
+                          "lng": point.loc.coordinates[0],
+                          "lat": point.loc.coordinates[1]
+                      }
+                      pathlist.push([f, x]);   
+                  }
+              })
+          });
+          promises.push(rs);
+      }}
+      
+      await Promise.all(promises);
+
+      res.status(200).send(pathlist);
+
+  } catch (error) {
+    console.log("An error occured while creating catalog!");
+    res.status(500).json({error: "An error occurred during the crossing point retrieval"});
+  }
+});
+
 
 module.exports = {createCatalog, router};

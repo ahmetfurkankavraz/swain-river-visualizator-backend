@@ -1,6 +1,7 @@
 const express = require("express");
-const { riverPointCollection, measurementCollection } = require('../db/db');
+const { riverPointCollection, measurementCollection, catalogCollection } = require('../db/db');
 const authenticateToken = require('../middleware/authenticateToken');
+const {createCatalog} = require('./rivercatalog.js');
 
 const router = express.Router();
 
@@ -43,9 +44,8 @@ router.post('/', authenticateToken, async function (req, res) {
 
     const riverPointsInDb = []
 
-    const river = req.body;
+    const river = req.body.river;
     let branchIndex = 0;
-    river.sort((a, b) => b.length - a.length);
 
     river.forEach((branch) => {
 
@@ -69,7 +69,7 @@ router.post('/', authenticateToken, async function (req, res) {
         branchIndex++;
     })
 
-    riverPointCollection()
+    await riverPointCollection()
         .insertMany(riverPointsInDb)
         .then(() => {
             res.status(201).send();
@@ -77,20 +77,29 @@ router.post('/', authenticateToken, async function (req, res) {
         .catch(() => {
             res.status(500).json({error: "Couldn't insert the records!"})
         })
+
+    createCatalog(req.body.rootBranchId);
 });
 
 router.delete('/', authenticateToken, async function (req, res) {
-    riverPointCollection()
+    await riverPointCollection()
+        .deleteMany({})
+        .then(() => {})
+        .catch(() => {
+            res.status(500).json({error: "Couldn't delete the records!"})
+        })
+
+    await measurementCollection()
+        .deleteMany({})
+        .then(() => {})
+        .catch(() => {
+            res.status(500).json({error: "Couldn't delete the records!"})
+        })
+
+    await catalogCollection()
         .deleteMany({})
         .then(() => {
-            measurementCollection()
-                .deleteMany({})
-                .then(() => {
-                    res.status(200).send();
-                })
-                .catch(() => {
-                    res.status(500).json({error: "Couldn't delete the records!"})
-                })
+            res.status(200).send();
         })
         .catch(() => {
             res.status(500).json({error: "Couldn't delete the records!"})

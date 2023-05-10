@@ -1,6 +1,6 @@
 const express = require("express");
-const { measurementCollection, riverPointCollection } = require('./../db/db')
-const authenticateToken = require('../middleware/authenticateToken')
+const { measurementCollection, riverPointCollection, catalogCollection } = require('./../db/db')
+const authenticateToken = require('../middleware/authenticateToken');
 
 const router = express.Router();
 
@@ -40,6 +40,7 @@ function findScale(point, segmentDividerArray){
 
 // Divide the river branches to segments according to their interpolated values
 // for scale, min and max values are used to segment the points 
+// this function provides a faster rendering for the frontend
 function divideRiverBranchesToSegments(branch, segmentDividerArray, branchId){
     let prevScale = findScale(branch[0], segmentDividerArray);
     let segmentInd = 0;
@@ -146,6 +147,13 @@ try {
                 measurementsMap[measurement.pointId][measurement.type] = measurement;
             }
         });
+
+    // if we map the points somehow, we can also map the measurements by looking that map table
+    // the mapping part can be embedded here.
+    // a point table should be used to map the close points in river
+    // format is {from: pointID, to: pointID}
+    // then if there is a measurement for a "from point", we can also map the measurement for the "to point"
+    
     
     // using the measurements find the unique branches
     let clippedBranches = await riverPointCollection()
@@ -181,37 +189,30 @@ try {
             }
         });
 
-    // the crossing points section is not used for now
-    // await riverPointCollection()
-    // .aggregate([
-    //     {"$match": {
-    //         "branchId": {$in: clippedBranches}
-    //     }},
-    //     { "$group": {
-    //         "_id": {
-    //             "lat": "$lat",
-    //             "lng": "$lng"
-    //         },
-    //         "count": { "$sum": 1 }
-    //     }},
-    //     {"$match": {
-    //         "count": {$gt: 1}
-    //     }}
-    // ])
-    // .toArray()
-    // .then(crossingPoints => {
-    //     riverPointCollection()
-    //         .find({device: true, branchId: {$in: clippedBranches}})
-    //         .toArray()
-    //         .then(devices => {
-    //             console.log(devices, crossingPoints);
-    //         })
-    // })
+
+    const riverCatalog = await catalogCollection()
+        .findOne({})
+
+    // topological sort array
+    const topologicalSortArr = riverCatalog.topologicalSort;
+
+    // crossing points map
+    const mappedCrossingPoints = new Map();
+    for (const arr of riverCatalog.mappedPoints){
+        mappedCrossingPoints.set(arr[0].toString(), arr[1].toString());
+    }
+
+    // the interpolation will be held in topological order
+    const traverseBranchesInTopologicalOrder = topologicalSortArr.filter((branchId) => clippedBranches.includes(branchId));
+    
+    // hold previous interpolations in a map
+    const holdAllInterpolationsById = new Map();
 
     let river = []
-    // console.log(segmentDividerArray);
-    
-    for (let key in pointMap){
+
+    for (let key of traverseBranchesInTopologicalOrder){  // burada branchlerin hepsini topologic sıraya göre gezmek 
+                                // ayrıca her branch noktası için daha önceden başka bir branchte 
+                                // yapılmış ölçüm olabilir mi diye bakmak gerekiyor
 
         let branch = pointMap[key];
 
@@ -225,6 +226,22 @@ try {
             continue;
         }
 
+        // check whether there is a crossing point or not
+        // if there is one
+        // append a measurement for that specific point
+        for (let point of branch){
+            if (holdAllInterpolationsById.has(mappedCrossingPoints.get(point._id.toString()))){
+                let measuredPoint = holdAllInterpolationsById.get(mappedCrossingPoints.get(point._id.toString()));
+                measurementsByBranches[key].push({
+                    pointId: point._id,
+                    date,
+                    type,
+                    value: measuredPoint.value,
+                    orderInBranch: point.orderInBranch
+                });
+            }
+        }
+
         // arrange the measurements array
         // add an element for orderInBranch = 0 and orderInBranch = last_item
         // to be able to interpolate the values
@@ -236,13 +253,17 @@ try {
         // the iterator used to find the devices 
         // if a measurement point is between two devices, the iterator will be used to 
         // find the two devices
-        for (let point in branch){
-            if (iterator + 1 < measurementsByBranches[key].length && branch[point].orderInBranch > measurementsByBranches[key][iterator].orderInBranch){
+        for (let point of branch){
+            if (iterator + 1 < measurementsByBranches[key].length && point.orderInBranch >= measurementsByBranches[key][iterator].orderInBranch){
                 iterator++;
             }
 
             let measurements = [measurementsByBranches[key][iterator - 1], measurementsByBranches[key][iterator]];
-            calcInterpolationValue(branch[point], measurements, measurementsMap);
+            calcInterpolationValue(point, measurements, measurementsMap);
+
+            if (mappedCrossingPoints.has(point._id.toString())){
+                holdAllInterpolationsById.set(point._id.toString(), point);
+            }
         }
         river = river.concat(divideRiverBranchesToSegments(branch, segmentDividerArray, key));
     }

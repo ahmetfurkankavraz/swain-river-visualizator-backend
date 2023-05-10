@@ -28,5 +28,6 @@ app.use('/river', require("./router/river"));
 app.use('/device', require("./router/device"));
 app.use('/measurement', require("./router/measurement"));
 app.use('/interpolate', require("./router/interpolate"));
+app.use('/river-catalog', require("./router/rivercatalog").router);
 app.use('/login', require("./router/login"));
 app.use('/doc', swaggerUi.serve, swaggerUi.setup(swaggerFile))

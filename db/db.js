@@ -52,4 +52,5 @@ module.exports = {
     riverPointCollection: () => dbConnection && dbConnection.collection('river-points'),
     measurementCollection: () => dbConnection && dbConnection.collection('measurement'),
     adminsCollection: () => dbConnection && dbConnection.collection('admins'),
+    catalogCollection: () => dbConnection && dbConnection.collection('catalog'),
 };

@@ -2,13 +2,20 @@ const jwt = require('jsonwebtoken');
 const express = require('express');
 const router = express.Router();
 const { adminsCollection } = require('../db/db');
+const crypto = require('crypto');
+
+function sha256(input) {
+    const hash = crypto.createHash('sha256');
+    hash.update(input);
+    return hash.digest('hex');
+}
 
 router.post('/', (req, res) => {
     const username = req.body.username;
     const password = req.body.password;
 
     adminsCollection()
-        .findOne({username: username, password: password})
+        .findOne({username: username, password: sha256(password)})
         .then((admin) => {
             if (admin){
                 const user = { name: username };

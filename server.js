@@ -1,5 +1,7 @@
 const express = require('express');
 const bodyParser = require('body-parser');
+const cors = require('cors');
+
 const swaggerUi = require('swagger-ui-express')
 const swaggerFile = require('./swagger_output.json')
 const {connectToDb} = require('./db/db');
@@ -7,6 +9,7 @@ require('dotenv').config();
 
 // init app
 var app = express();
+app.use(cors());
 
 // db connection
 connectToDb((err) => {

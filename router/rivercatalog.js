@@ -66,7 +66,7 @@ async function createCatalog(rootBranchId) {
               distance: 1
           }
           },{
-          $limit: 1
+              $limit: 1
           }]).toArray().then(a => {
 
               a.forEach((point) => {

@@ -153,6 +153,10 @@ router.delete('/', authenticateToken, async function (req, res) {
                 }
             )
 
+        await measurementCollection()
+            .deleteMany({pointId: closestPoint._id})
+
+
         if (dbRes.matchedCount == 0){
             res.status(500).json({error: "Couldn't find a match!"});
         }
